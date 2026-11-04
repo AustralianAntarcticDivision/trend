@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>trend - ocean climate records</title>
+<meta name="description" content="Continuously updated ocean climate records (sea surface temperature, sea level, chlorophyll-a) reduced to exact, mergeable statistics on a global discrete grid.">
+<style>
+
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --surface-2: #f0efec;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #8a897f;
+    --series-1: #2a78d6; --grid: #e4e3de; --border: #d8d7d0;
+    --accent-warm: #e34948;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --surface-2: #262624;
+      --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8a897f;
+      --series-1: #3987e5; --grid: #32322f; --border: #3d3d39;
+      --accent-warm: #e05252;
+    }
+  }
+  html, body { margin: 0; }
+  .viz-root { background: var(--surface-1); color: var(--text-primary);
+    font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+    min-height: 100vh; padding: 20px 24px 48px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  h1 { font-size: 20px; margin: 0 0 2px; font-weight: 650; padding-bottom: 8px; }
+  header { display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+  .xtabs { display: flex; gap: 4px; align-items: flex-end; flex: 1; }
+  .xtabs a { padding: 7px 14px; color: var(--text-secondary);
+    text-decoration: none; font-size: 13px; border: 1px solid transparent;
+    border-radius: 8px 8px 0 0; margin-bottom: -1px; white-space: nowrap; }
+  .xtabs a:hover { color: var(--text-primary); }
+  .xtabs a.on { background: var(--surface-1); border-color: var(--border);
+    border-bottom-color: var(--surface-1); color: var(--text-primary);
+    font-weight: 600; }
+  .xtabs a.ext { margin-left: auto; align-self: center; margin-bottom: 7px;
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
+    font-size: 12px; color: var(--series-1); background: var(--surface-2); }
+  .xtabs a.ext::after { content: " \2197"; }
+  .xtabs a.ext:hover { border-color: var(--series-1); }
+  .xtabs a.gh { align-self: center; margin-bottom: 7px; margin-left: 8px;
+    display: inline-flex; padding: 4px; color: var(--text-secondary);
+    border: none; }
+  .xtabs a.gh:hover { color: var(--text-primary); }
+  .sub { color: var(--text-secondary); font-size: 13px; margin: 2px 0 24px; }
+
+
+  h2 { font-size: 16px; font-weight: 650; margin: 34px 0 8px; }
+  p { margin: 10px 0; max-width: 72ch; }
+  a { color: var(--series-1); }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; }
+  .lede { font-size: 17px; line-height: 1.55; max-width: 64ch; margin: 18px 0 6px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 14px 0; }
+  .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .card h3 { font-size: 15px; margin: 0 0 4px; }
+  .card h3 a { color: var(--text-primary); text-decoration: none; }
+  .card h3 a:hover { color: var(--series-1); }
+  .card .src { color: var(--text-secondary); font-size: 13px; margin: 0 0 8px; }
+  .card ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--text-secondary); }
+  .card .go { display: inline-block; margin-top: 10px; font-size: 13px; }
+  table { border-collapse: collapse; font-size: 13.5px; margin: 10px 0; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 6px 16px 6px 0; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  th { color: var(--text-secondary); font-weight: 600; font-size: 12px; letter-spacing: .03em; text-transform: uppercase; }
+  figure { margin: 16px 0; }
+  figure img { width: 100%; max-width: 520px; height: auto; display: block; border-radius: 6px; }
+  figcaption { color: var(--text-muted); font-size: 12.5px; margin-top: 6px; max-width: 72ch; }
+  .finding { margin: 14px 0; max-width: 72ch; }
+  .finding b { display: block; }
+  footer { color: var(--text-muted); font-size: 12px; margin-top: 44px; border-top: 1px solid var(--border); padding-top: 12px; }
+  @media (max-width: 600px) { .viz-root { padding: 14px 16px 40px; } .lede { font-size: 16px; } table { font-size: 12.5px; } th, td { padding-right: 10px; } }
+</style>
+</head>
+<body>
+<div class="viz-root"><div class="wrap">
+<header style="display:block;border-bottom:1px solid var(--border);margin-bottom:4px">
+  <h1>trend</h1>
+</header>
+
+<p class="lede">Daily satellite records of the ocean, reduced once to exact,
+mergeable statistics on a global grid and kept current. Any region, any
+period, any combination: computed from the sums in seconds, without
+re-reading the archives.</p>
+
+<h2>The records</h2>
+<div class="cards">
+  <div class="card">
+    <h3><a href="https://mdsumner.github.io/trend.sst/">Sea surface temperature</a></h3>
+    <p class="src">NOAA OISST v2.1 (daily, from 1981) and GHRSST MUR (daily, 1 km, from 2002)</p>
+    <ul><li>updated daily</li><li>status, explorer, method, modes</li></ul>
+    <a class="go" href="https://mdsumner.github.io/trend.sst/">trend.sst &rarr;</a>
+  </div>
+  <div class="card">
+    <h3><a href="https://mdsumner.github.io/trend.sla/">Sea level anomaly</a></h3>
+    <p class="src">Copernicus Marine DUACS L4 (daily, 0.125&deg;, from 1993), delayed-time then near-real-time</p>
+    <ul><li>updated daily</li><li>status, explorer, method, modes</li></ul>
+    <a class="go" href="https://mdsumner.github.io/trend.sla/">trend.sla &rarr;</a>
+  </div>
+  <div class="card">
+    <h3><a href="https://mdsumner.github.io/trend.chl/">Chlorophyll-a</a></h3>
+    <p class="src">ESA Ocean Colour CCI v6.0 (5-day, 4 km, from 1997), in log10</p>
+    <ul><li>fixed release, checked weekly</li><li>status, explorer, method, modes</li></ul>
+    <a class="go" href="https://mdsumner.github.io/trend.chl/">trend.chl &rarr;</a>
+  </div>
+</div>
+
+<h2>How it works</h2>
+<p>Every pixel of every daily field is assigned whole to the S2 level-5
+cell containing its centre (about 290 km across); nothing is warped or
+resampled. Each cell keeps four numbers per date: the pixel count, the
+summed area weight, and the weighted sum and sum of squares of the
+value. Sums add: the mean and variance of any union of cells and dates
+come from adding rows and taking one ratio, so a region is a selection
+of cells, not a new computation, and the statistics are exact. The
+design follows NASA ocean colour's binning scheme (weighted sums and
+sums of squares per equal-area bin, since 1997).</p>
+<p>The engine is <a href="https://github.com/hypertidy/grist">grist</a>,
+an R package: catalogs of source files in, per-date cell sums out. Each
+record is a small repository that holds only its product knowledge
+(catalog, schedule, checks, site). Backfills and daily updates run on
+Pawsey's Setonix, and the sums are published to Pawsey object storage.</p>
+
+<h2>What is checked</h2>
+<table>
+  <tr><th>check</th><th>result</th></tr>
+  <tr><td>cell sums against direct computation on the same source file</td>
+      <td>exact to every printed digit (chlorophyll, 2010-05-01)</td></tr>
+  <tr><td>engine against the original trend.sst implementation</td>
+      <td>bit-identical sums (OISST, GHRSST)</td></tr>
+  <tr><td>global mean sea level rate, 1993&ndash;2026</td>
+      <td>3.16 mm/yr; published altimetry about 3.1&ndash;3.3</td></tr>
+  <tr><td>leading mode against NOAA&rsquo;s Oceanic Ni&ntilde;o Index</td>
+      <td>r = 0.96 (SST), 0.94 (sea level), peaking at zero lag</td></tr>
+  <tr><td>orientation and content of one date per record, mapped</td>
+      <td>El Ni&ntilde;o tongue (1997), bloom and gyres (2010)</td></tr>
+</table>
+
+<h2>Findings</h2>
+<figure>
+<img src="kelvin-hovmoller.png" alt="Hovmoller diagram of equatorial Pacific sea level anomaly by longitude and date, October 2025 to November 2026, showing an eastward-propagating Kelvin wave">
+<figcaption>Equatorial Pacific sea level anomaly (minus the daily global
+mean), October 2025 to November 2026, from the sums. The diagonal band is
+the Kelvin wave that set off the 2026 El Ni&ntilde;o.</figcaption>
+</figure>
+<div class="finding"><b>The 2026 Kelvin wave.</b> It crosses 160&deg;E in
+mid-March and reaches the South American coast in early May: about
+12,000 km in 50 days, 2.8 m/s, the speed of a first-mode equatorial
+Kelvin wave. <a href="https://mdsumner.github.io/trend.sla/method.html">trend.sla method</a></div>
+<div class="finding"><b>ENSO is the leading mode of every record.</b>
+Empirical orthogonal functions of the monthly cell means find El
+Ni&ntilde;o/La Ni&ntilde;a as mode 1 in sea temperature (14% of variance)
+and sea level (18%), with 2026 the largest peak in both; it is weaker in
+chlorophyll (9%). <a href="https://mdsumner.github.io/trend.sst/modes.html">SST modes</a> &middot;
+<a href="https://mdsumner.github.io/trend.sla/modes.html">sea level modes</a> &middot;
+<a href="https://mdsumner.github.io/trend.chl/modes.html">chlorophyll modes</a></div>
+<div class="finding"><b>A lake in the sea level record.</b> The Copernicus
+sea level grid includes the Caspian Sea, whose series falls about 1.5 m
+from 1995 to 2021 and then rises about 1.2 m in a year from September
+2022, more likely a processing change than a real signal. It surfaced as
+a mode of its own. <a href="https://mdsumner.github.io/trend.sla/modes.html">trend.sla modes</a></div>
+<div class="finding"><b>Lakes everywhere else.</b> Unmasked, the Great
+Lakes are OISST&rsquo;s second mode and the lakes of the Tibetan Plateau
+take GHRSST MUR&rsquo;s first two. Each mode now reports how concentrated
+its pattern is, and the analysis uses ocean cells only.
+<a href="https://mdsumner.github.io/trend.sst/modes.html">trend.sst modes</a></div>
+
+<h2>The data</h2>
+<p>Each record publishes its sums (one Parquet file per date: cell,
+date, n, sumw, sumwx, sumwx2), its catalog and a manifest, readable
+anonymously over https:</p>
+<ul>
+  <li><a class="mono" href="https://projects.pawsey.org.au/aad-derived/trend-sst/manifest.json">aad-derived/trend-sst/manifest.json</a></li>
+  <li><a class="mono" href="https://projects.pawsey.org.au/aad-derived/trend-sla/manifest.json">aad-derived/trend-sla/manifest.json</a></li>
+  <li><a class="mono" href="https://projects.pawsey.org.au/aad-derived/trend-chl/manifest.json">aad-derived/trend-chl/manifest.json</a></li>
+</ul>
+<p>Each site&rsquo;s Explorer writes runnable R, Python and SQL for any
+selection of cells against these files.</p>
+
+<h2>Acknowledgments</h2>
+<p>This work uses resources of the Pawsey Supercomputing Research Centre,
+with funding from the Australian Government and the Government of
+Western Australia. Data: NOAA OISST v2.1; GHRSST Level 4 MUR (NASA JPL);
+E.U. Copernicus Marine Service Information; ESA Ocean Colour Climate
+Change Initiative, version 6.0.</p>
+
+<footer>trend &middot; Australian Antarctic Division &middot;
+<a href="https://github.com/AustralianAntarcticDivision/trend">source</a> &middot;
+engine: <a href="https://github.com/hypertidy/grist">hypertidy/grist</a></footer>
+</div></div>
+</body>
+</html>
