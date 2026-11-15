@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>trend - ocean climate records</title>
-<meta name="description" content="Continuously updated ocean climate records (sea surface temperature, sea level, chlorophyll-a) reduced to exact, mergeable statistics on a global discrete grid.">
+<meta name="description" content="Continuously updated ocean climate records (sea surface temperature, sea level, chlorophyll-a, sea ice) reduced to exact, mergeable statistics on a global discrete grid.">
 <style>
 
   .viz-root {
@@ -57,7 +57,7 @@
   a { color: var(--series-1); }
   .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; }
   .lede { font-size: 17px; line-height: 1.55; max-width: 64ch; margin: 18px 0 6px; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 14px 0; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin: 14px 0; }
   .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
   .card h3 { font-size: 15px; margin: 0 0 4px; }
   .card h3 a { color: var(--text-primary); text-decoration: none; }
@@ -93,7 +93,7 @@ re-reading the archives.</p>
   <div class="card">
     <h3><a href="https://mdsumner.github.io/trend.sst/">Sea surface temperature</a></h3>
     <p class="src">NOAA OISST v2.1 (daily, from 1981) and GHRSST MUR (daily, 1 km, from 2002)</p>
-    <ul><li>updated daily</li><li>status, explorer, method, modes</li></ul>
+    <ul><li>updated daily</li><li>status, explorer, marine heatwaves, method, modes</li></ul>
     <a class="go" href="https://mdsumner.github.io/trend.sst/">trend.sst &rarr;</a>
   </div>
   <div class="card">
@@ -107,6 +107,12 @@ re-reading the archives.</p>
     <p class="src">ESA Ocean Colour CCI v6.0 (5-day, 4 km, from 1997), in log10</p>
     <ul><li>fixed release, checked weekly</li><li>status, explorer, method, modes</li></ul>
     <a class="go" href="https://mdsumner.github.io/trend.chl/">trend.chl &rarr;</a>
+  </div>
+  <div class="card">
+    <h3><a href="https://mdsumner.github.io/trend.ice/">Sea ice</a></h3>
+    <p class="src">NSIDC sea ice concentration CDR (daily, 25 km, Southern Ocean): seasonality per pixel, and concentration sums on S2 cells</p>
+    <ul><li>day of advance and retreat, ice season duration, per ice year</li><li>the ice-edge bloom, with trend.chl</li></ul>
+    <a class="go" href="https://mdsumner.github.io/trend.ice/">trend.ice &rarr;</a>
   </div>
 </div>
 
@@ -169,6 +175,13 @@ Lakes are OISST&rsquo;s second mode and the lakes of the Tibetan Plateau
 take GHRSST MUR&rsquo;s first two. Each mode now reports how concentrated
 its pattern is, and the analysis uses ocean cells only.
 <a href="https://mdsumner.github.io/trend.sst/modes.html">trend.sst modes</a></div>
+<div class="finding"><b>A record marine heatwave in the Tasman Sea.</b>
+Per pixel on 1 km GHRSST MUR, a heatwave (Hobday et al. 2016) has been
+under way since late May 2026, covering 74% of the Tasman box at its
+October peak, and 2026 already has the most heatwave days of any year in
+the MUR record. The same pipeline reproduces the 2015/16 Tasman and
+2010/11 Western Australia events.
+<a href="https://mdsumner.github.io/trend.sst/heatwaves.html">trend.sst heatwaves</a></div>
 
 <h2>The data</h2>
 <p>Each record publishes its sums (one Parquet file per date: cell,
@@ -179,6 +192,9 @@ anonymously over https:</p>
   <li><a class="mono" href="https://projects.pawsey.org.au/aad-derived/trend-sla/manifest.json">aad-derived/trend-sla/manifest.json</a></li>
   <li><a class="mono" href="https://projects.pawsey.org.au/aad-derived/trend-chl/manifest.json">aad-derived/trend-chl/manifest.json</a></li>
 </ul>
+<p>Sea ice seasonality is published as per-ice-year GeoTIFFs under
+<span class="mono">aad-derived/trend-ice/</span>; see the
+<a href="https://mdsumner.github.io/trend.ice/data.html">trend.ice data page</a>.</p>
 <p>Each site&rsquo;s Explorer writes runnable R, Python and SQL for any
 selection of cells against these files.</p>
 
@@ -186,6 +202,7 @@ selection of cells against these files.</p>
 <p>This work uses resources of the Pawsey Supercomputing Research Centre,
 with funding from the Australian Government and the Government of
 Western Australia. Data: NOAA OISST v2.1; GHRSST Level 4 MUR (NASA JPL);
+NSIDC Sea Ice Concentration CDR;
 E.U. Copernicus Marine Service Information; ESA Ocean Colour Climate
 Change Initiative, version 6.0.</p>
 
