@@ -19,3 +19,12 @@ nav); a new record gets a card on `docs/index.html` and a row above.
 
 The page is `docs/index.html`, served by GitHub Pages from `main` /
 `docs`. It is a single static file with no build step.
+
+## Working repos on Setonix
+
+Each record's clone lives in `$MYSOFTWARE/<repo>` (persistent), its data
+and job logs in `$MYSCRATCH/<repo>`: the clone's gitignored paths
+(`sums/`, `mapping/`, catalogs) are symlinks to scratch, so scripts keep
+their relative paths. `tools/move-to-software.sh <repo>` makes that
+layout from an old scratch clone (dry run unless `--go`); then set the
+scrontab entry's `--chdir` to the new clone.
