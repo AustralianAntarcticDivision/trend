@@ -1,0 +1,97 @@
+#!/bin/bash
+## scron -- manage the (single, per-user) Slurm scrontab from fragments.
+##
+## `scrontab <file>` REPLACES the whole crontab, so no repo installs its
+## own: each job is a fragment, and the installed crontab is built from
+## the fragments selected in $SCRON_D (default $MYSOFTWARE/scrontab.d):
+##   NN-name.txt   a symlink to a repo's fragment (e.g. trend.sst/scrontab.txt)
+##                 or a plain file for jobs that live in no repo
+## Files are concatenated in name order. A fragment is one or more jobs:
+## #SCRON option lines followed by their cron line (options apply to the
+## next cron line only).
+##
+##   scron list            selected fragments and their jobs
+##   scron build           print the crontab that would be installed
+##   scron diff            installed vs built
+##   scron install         back up the installed one, then install the built one
+##   scron enable  <NN-name> <fragment>   select a fragment (symlink)
+##   scron disable <NN-name>              unselect (moves it to $SCRON_D/off/)
+##   scron restore <backup>               reinstall a backup (after backing up)
+## Backups: $SCRON_D/backups/scrontab-<UTC time>.txt, one per install/restore.
+set -euo pipefail
+D=${SCRON_D:-$MYSOFTWARE/scrontab.d}
+B=$D/backups
+mkdir -p "$D" "$B"
+cmd=${1:-list}; shift || true
+
+frags() { find "$D" -maxdepth 1 \( -type f -o -type l \) -name '*.txt' | sort; }
+
+## each fragment: must resolve, and every cron line must be preceded by a
+## --chdir that exists (a missing dir makes the job fail silently)
+check() {
+  local f=$1 ok=0 chdir=""
+  [ -e "$f" ] || { echo "BROKEN link: $f -> $(readlink "$f")" >&2; return 1; }
+  while IFS= read -r l; do
+    case "$l" in
+      "#SCRON"*--chdir=*) chdir=${l##*--chdir=}; chdir=${chdir%% *} ;;
+      "#"*|"") ;;
+      *) set -- $l
+         if [ $# -lt 6 ]; then echo "BAD cron line in $f: $l" >&2; ok=1
+         elif [ -n "$chdir" ] && [ ! -d "$chdir" ]; then
+           echo "MISSING --chdir $chdir in $f" >&2; ok=1; fi
+         chdir="" ;;
+    esac
+  done < "$f"
+  return $ok
+}
+
+build() {
+  local f bad=0
+  for f in $(frags); do check "$f" || bad=1; done
+  [ $bad -eq 0 ] || { echo "fix the fragments above first" >&2; exit 1; }
+  echo "## built by scron from $D on $(date -u +%FT%TZ) -- edit the fragments, not this"
+  for f in $(frags); do
+    echo; echo "## ---- $(basename "$f")$( [ -L "$f" ] && echo " -> $(readlink -f "$f")")"
+    cat "$f"; [ -z "$(tail -c1 "$f")" ] || echo
+  done
+}
+
+## comparable form: drop our own banner/separator lines and blank lines
+norm() { grep -v -E '^## (built by scron|---- )' | grep -v '^[[:space:]]*$' || true; }
+
+case "$cmd" in
+  list)
+    for f in $(frags); do
+      printf '%-28s %s\n' "$(basename "$f")" "$( [ -L "$f" ] && readlink "$f" || echo '(local file)')"
+      grep -E '^#SCRON --job-name|^[^#[:space:]]' "$f" 2>/dev/null | sed 's/^/    /' || true
+    done ;;
+  build) build ;;
+  diff)
+    if diff <(scrontab -l 2>/dev/null | norm) <(build | norm); then
+      echo "installed scrontab matches the fragments"; fi ;;
+  install)
+    new=$(mktemp); build > "$new"
+    if diff <(scrontab -l 2>/dev/null | norm) <(norm < "$new"); then
+      echo "no change; nothing installed"; rm -f "$new"; exit 0; fi
+    bk=$B/scrontab-$(date -u +%Y%m%dT%H%M%S.%NZ).txt
+    scrontab -l > "$bk" 2>/dev/null || true
+    read -r -p "install the above? backup is $bk [y/N] " a
+    [ "$a" = y ] || { echo "not installed"; rm -f "$new"; exit 1; }
+    scrontab "$new"; rm -f "$new"
+    echo "installed; backup $bk"; scrontab -l | grep -E '^#SCRON --(job-name|chdir)' ;;
+  enable)
+    name=${1:?enable <NN-name> <fragment>}; frag=${2:?enable <NN-name> <fragment>}
+    case "$name" in *.txt) ;; *) name=$name.txt ;; esac
+    frag=$(readlink -f "$frag"); [ -f "$frag" ] || { echo "no fragment $frag" >&2; exit 1; }
+    check "$frag"; ln -sfn "$frag" "$D/$name"; echo "enabled $name -> $frag (run: scron diff; scron install)" ;;
+  disable)
+    name=${1:?disable <NN-name>}; case "$name" in *.txt) ;; *) name=$name.txt ;; esac
+    mkdir -p "$D/off"; mv "$D/$name" "$D/off/"; echo "disabled $name (in $D/off; run: scron install)" ;;
+  restore)
+    f=${1:?restore <backup file>}; [ -f "$f" ] || { echo "no file $f" >&2; exit 1; }
+    diff <(scrontab -l 2>/dev/null | norm) <(norm < "$f") || true
+    bk=$B/scrontab-$(date -u +%Y%m%dT%H%M%S.%NZ).txt; scrontab -l > "$bk" 2>/dev/null || true
+    read -r -p "restore $f? current saved to $bk [y/N] " a
+    [ "$a" = y ] && scrontab "$f" && echo "restored" || echo "not restored" ;;
+  *) sed -n '2,22p' "$0"; exit 1 ;;
+esac

@@ -28,3 +28,21 @@ and job logs in `$MYSCRATCH/<repo>`: the clone's gitignored paths
 their relative paths. `tools/move-to-software.sh <repo>` makes that
 layout from an old scratch clone (dry run unless `--go`); then set the
 scrontab entry's `--chdir` to the new clone.
+
+## Scheduled jobs (scrontab)
+
+Slurm keeps ONE crontab per user and `scrontab <file>` replaces all of
+it, so no repo installs its own. Each repo carries a fragment
+(`scrontab.txt`; trend.ice `pawsey/scrontab.txt`), and `tools/scron`
+builds the installed crontab from the fragments selected in
+`$MYSOFTWARE/scrontab.d/` (symlinks to repo fragments, plain files for
+jobs that live in no repo; name order = install order):
+
+    scron list | build | diff
+    scron enable 10-trend.sst $MYSOFTWARE/trend.sst/scrontab.txt
+    scron install        # shows the diff, backs up the installed crontab, asks
+    scron disable 10-trend.sst
+    scron restore $MYSOFTWARE/scrontab.d/backups/scrontab-<time>.txt
+
+Every install and restore keeps a backup in `scrontab.d/backups/`.
+`scron` refuses a fragment whose `--chdir` does not exist.
