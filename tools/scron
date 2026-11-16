@@ -14,6 +14,7 @@
 ##   scron build           print the crontab that would be installed
 ##   scron diff            installed vs built
 ##   scron install         back up the installed one, then install the built one
+##                         (refuses an empty selection unless --allow-empty)
 ##   scron enable  <NN-name> <fragment>   select a fragment (symlink)
 ##   scron disable <NN-name>              unselect (moves it to $SCRON_D/off/)
 ##   scron restore <backup>               reinstall a backup (after backing up)
@@ -71,6 +72,12 @@ case "$cmd" in
       echo "installed scrontab matches the fragments"; fi ;;
   install)
     new=$(mktemp); build > "$new"
+    ## an empty selection would wipe every job: refuse unless asked for
+    nj=$(grep -c -E '^[^#[:space:]]' "$new" || true)
+    if [ "$nj" -eq 0 ] && [ "${1:-}" != --allow-empty ]; then
+      echo "no jobs selected in $D (scron list is empty): refusing to install an" >&2
+      echo "empty crontab. Enable fragments first, or: scron install --allow-empty" >&2
+      rm -f "$new"; exit 1; fi
     if diff <(scrontab -l 2>/dev/null | norm) <(norm < "$new"); then
       echo "no change; nothing installed"; rm -f "$new"; exit 0; fi
     bk=$B/scrontab-$(date -u +%Y%m%dT%H%M%S.%NZ).txt
