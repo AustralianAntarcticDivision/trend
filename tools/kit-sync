@@ -1,0 +1,44 @@
+#!/bin/bash
+## kit-sync: copy the shared site kit (kit/ in this repo) into trend.*
+## site clones, so each site serves its own same-origin copy.
+##
+##   tools/kit-sync ../trend.sst ../trend.sla ...   # write <site>/kit/
+##   tools/kit-sync --check ../trend.sst ...         # report drift, write nothing
+##
+## The site directory is the one holding site.js: docs/ (sst, sla, chl)
+## or site/ (trend.ice, a Quarto project). kit/VERSION records the hub
+## commit the copy came from ("+dirty" if kit/ had uncommitted edits),
+## so a site always says which kit it runs. Commit the copy in the site
+## repo afterwards; this tool never commits or pushes.
+set -eu
+HUB=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+KIT=$HUB/kit
+check=0
+[ "${1:-}" = "--check" ] && { check=1; shift; }
+[ $# -gt 0 ] || { sed -n '2,13p' "$0" | sed 's/^## \{0,1\}//'; exit 2; }
+
+rev=$(git -C "$HUB" rev-parse --short HEAD)
+[ -z "$(git -C "$HUB" status --porcelain -- kit)" ] || rev="$rev+dirty"
+files=$(cd "$KIT" && ls *.js *.css)
+status=0
+for repo in "$@"; do
+  dir=
+  for d in docs site; do [ -f "$repo/$d/site.js" ] && { dir=$repo/$d; break; }; done
+  [ -n "$dir" ] || { echo "$repo: no docs/site.js or site/site.js, skipped" >&2; status=1; continue; }
+  dest=$dir/kit
+  if [ $check = 1 ]; then
+    drift=0
+    for f in $files; do cmp -s "$KIT/$f" "$dest/$f" || { echo "$repo: kit/$f differs"; drift=1; }; done
+    [ $drift = 0 ] && echo "$repo: kit in step ($(cat "$dest/VERSION" 2>/dev/null || echo 'no VERSION'))" || status=1
+    continue
+  fi
+  mkdir -p "$dest"
+  for f in $files; do cp "$KIT/$f" "$dest/$f"; done
+  ## files dropped from the kit are dropped from the copy too
+  for f in $(cd "$dest" && ls *.js *.css 2>/dev/null); do
+    [ -f "$KIT/$f" ] || { rm "$dest/$f"; echo "$repo: removed kit/$f"; }
+  done
+  printf 'AustralianAntarcticDivision/trend kit %s %s\n' "$rev" "$(date -u +%F)" > "$dest/VERSION"
+  echo "$repo: kit $rev -> ${dest#$repo/}"
+done
+exit $status
