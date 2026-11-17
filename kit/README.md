@@ -69,10 +69,15 @@ Written by each record's exporter into the site's `data/`:
 - `status.json`, `series.json`: store state and daily regional series
 - `coast-110m.json`: coastline mesh
 
-`w` is the weight of a cell in a union. The exact weight is the cell's
-mean daily `sumw` (its ocean area for sea ice); the sst, sla and chl
-exporters write `sumw / n`, the mean per-pixel weight, which treats a
-coastal cell as if it were full.
+`w` is the weight of a cell in a union: its mean `sumw` per time step
+with data, i.e. the ocean area it covers in the record's weight units
+(km2 for sea ice, cos-latitude pixel weights for the others). The
+explorer's selection series is `sum(w * mean) / sum(w)` over the cells
+with a value that month. That equals the union of the sums wherever a
+cell's coverage is steady from step to step (SST everywhere, sea ice,
+SLA outside the ice) and approximates it where coverage varies (cloud
+in chlorophyll). Within a record only ratios of `w` matter; for sea ice
+`sum(w * mean)` is itself sea ice area.
 
 ## Adding a record
 
