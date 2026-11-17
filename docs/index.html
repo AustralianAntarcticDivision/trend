@@ -93,25 +93,25 @@ re-reading the archives.</p>
   <div class="card">
     <h3><a href="https://mdsumner.github.io/trend.sst/">Sea surface temperature</a></h3>
     <p class="src">NOAA OISST v2.1 (daily, from 1981) and GHRSST MUR (daily, 1 km, from 2002)</p>
-    <ul><li>updated daily</li><li>status, explorer, marine heatwaves, method, modes</li></ul>
+    <ul><li>updated daily</li><li>explorer, status, marine heatwaves, method, modes</li></ul>
     <a class="go" href="https://mdsumner.github.io/trend.sst/">trend.sst &rarr;</a>
   </div>
   <div class="card">
     <h3><a href="https://mdsumner.github.io/trend.sla/">Sea level anomaly</a></h3>
     <p class="src">Copernicus Marine DUACS L4 (daily, 0.125&deg;, from 1993), delayed-time then near-real-time</p>
-    <ul><li>updated daily</li><li>status, explorer, method, modes</li></ul>
+    <ul><li>updated daily</li><li>explorer, status, method, modes</li></ul>
     <a class="go" href="https://mdsumner.github.io/trend.sla/">trend.sla &rarr;</a>
   </div>
   <div class="card">
     <h3><a href="https://mdsumner.github.io/trend.chl/">Chlorophyll-a</a></h3>
     <p class="src">ESA Ocean Colour CCI v6.0 (5-day, 4 km, from 1997), in log10</p>
-    <ul><li>fixed release, checked weekly</li><li>status, explorer, method, modes</li></ul>
+    <ul><li>fixed release, checked weekly</li><li>explorer, status, method, modes</li></ul>
     <a class="go" href="https://mdsumner.github.io/trend.chl/">trend.chl &rarr;</a>
   </div>
   <div class="card">
     <h3><a href="https://mdsumner.github.io/trend.ice/">Sea ice</a></h3>
     <p class="src">NSIDC sea ice concentration CDR (daily, 25 km, Southern Ocean): seasonality per pixel, and concentration sums on S2 cells</p>
-    <ul><li>day of advance and retreat, ice season duration, per ice year</li><li>the ice-edge bloom, with trend.chl</li></ul>
+    <ul><li>updated weekly; explorer (polar view, with the other records on the same cells), status</li><li>day of advance and retreat, ice season duration, per ice year</li><li>the ice-edge bloom, with trend.chl</li></ul>
     <a class="go" href="https://mdsumner.github.io/trend.ice/">trend.ice &rarr;</a>
   </div>
 </div>
@@ -191,12 +191,16 @@ anonymously over https:</p>
   <li><a class="mono" href="https://projects.pawsey.org.au/aad-derived/trend-sst/manifest.json">aad-derived/trend-sst/manifest.json</a></li>
   <li><a class="mono" href="https://projects.pawsey.org.au/aad-derived/trend-sla/manifest.json">aad-derived/trend-sla/manifest.json</a></li>
   <li><a class="mono" href="https://projects.pawsey.org.au/aad-derived/trend-chl/manifest.json">aad-derived/trend-chl/manifest.json</a></li>
+  <li><a class="mono" href="https://projects.pawsey.org.au/aad-derived/trend-ice/s2/manifest.json">aad-derived/trend-ice/s2/manifest.json</a></li>
 </ul>
-<p>Sea ice seasonality is published as per-ice-year GeoTIFFs under
+<p>Sea ice seasonality is also published as per-ice-year GeoTIFFs under
 <span class="mono">aad-derived/trend-ice/</span>; see the
 <a href="https://mdsumner.github.io/trend.ice/data.html">trend.ice data page</a>.</p>
-<p>Each site&rsquo;s Explorer writes runnable R, Python and SQL for any
-selection of cells against these files.</p>
+<p>Every site opens on the same S2 cell explorer. It writes runnable
+R, Python and SQL for any selection of cells against these files, and a
+selection carries from one record to another: the trend.ice explorer
+shows sea surface temperature, chlorophyll and sea level on the sea ice
+cells.</p>
 
 <h2>Acknowledgments</h2>
 <p>This work uses resources of the Pawsey Supercomputing Research Centre,

@@ -17,6 +17,20 @@ Engine: [hypertidy/grist](https://github.com/hypertidy/grist).
 Every record's site links back here (the "trend family" pill in its
 nav); a new record gets a card on `docs/index.html` and a row above.
 
+## The site kit
+
+All four sites share one look and one landing page, the S2 cell
+explorer, from the kit in `kit/` (header and tabs, CSS, the family
+registry `records.js`, and the explorer, status, modes and mechanics
+modules). Each site carries a vendored copy and a small `site.js`; the
+kit is edited here and copied out with
+
+    tools/kit-sync ../trend.sst ../trend.sla ../trend.chl ../trend.ice
+
+then committed in each site. See `kit/README.md` for the site config,
+views (Equal Earth by default, transverse Mercator for trend.ice) and
+the data contract.
+
 The page is `docs/index.html`, served by GitHub Pages from `main` /
 `docs`. It is a single static file with no build step.
 
