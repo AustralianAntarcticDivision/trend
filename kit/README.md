@@ -42,7 +42,7 @@ window.TREND_SITE = {
     family: ["sst:oisst", "chl:occci-log10chl"],   // other records, read from their sites
     view: "tmerc",                     // default view (all views are in the menu)
     rotate: [-115, 70],                // central meridian 115E; globe centred 115E 70S
-    tmerc: { frame: "both", radius: 50 },   // south | north | both polar caps
+    tmerc: { frame: "both", radius: 50 },   // south | north | both polar caps; lon0 pins its meridian
     coast: true                        // coastline on at load
   }
 };
@@ -51,10 +51,14 @@ window.TREND_SITE = {
 Views: `world` (Equal Earth, the family default), `tmerc` (transverse
 Mercator on the central meridian, as `+proj=tmerc +lon_0=...`; the polar
 default), `ortho` (globe), `longlat`, `spilhaus` (needs `sring` in the
-export), `faces` (S2 cube net). All views share the central meridian.
+export), `faces` (S2 cube net). All views share the central meridian
+unless `tmerc.lon0` is set.
 The tmerc view is framed on the polar cap(s) of `tmerc.frame`: both
 poles lie on the central meridian, so one transverse Mercator holds both
-caps (`"both"`: Antarctic below, Arctic above on `lon_0=115`).
+caps (`"both"`: Antarctic below, Arctic above on `lon_0=115`, the family
+convention). `tmerc.lon0` gives the tmerc view its own central meridian,
+so sst, sla and chl keep a Pacific-centred world view (`rotate: [155,
+10]`) beside the 115E transverse Mercator.
 
 A page is a thin HTML file: kit CSS, `kit/records.js`, `site.js`, the
 header placeholder `<header class="trend"></header><script
