@@ -66,6 +66,8 @@ Written by each record's exporter into the site's `data/`:
 - `cells-<source>.json`: `{ months, regions: { key: { label, cells } },
   cells: [{ id, ring, mean, trend, anom, w, lon, lat, sring? }] }`
 - `monthly-<source>.bin`: Float32 cells x months, cell-major
+- `weights-<source>.bin` (optional): Float32 cells x months of cell
+  weights, same layout, named by the cells JSON `"weights"` field
 - `status.json`, `series.json`: store state and daily regional series
 - `coast-110m.json`: coastline mesh
 
@@ -74,10 +76,15 @@ with data, i.e. the ocean area it covers in the record's weight units
 (km2 for sea ice, cos-latitude pixel weights for the others). The
 explorer's selection series is `sum(w * mean) / sum(w)` over the cells
 with a value that month. That equals the union of the sums wherever a
-cell's coverage is steady from step to step (SST everywhere, sea ice,
-SLA outside the ice) and approximates it where coverage varies (cloud
-in chlorophyll). Within a record only ratios of `w` matter; for sea ice
-`sum(w * mean)` is itself sea ice area.
+cell's coverage is steady from step to step (SST, SLA and sea ice).
+Where coverage varies (cloud, ice and polar night in chlorophyll) the
+exporter also writes the monthly weights: the cell's `sumw` in each
+month over the number of time steps in that month, in `w`'s units, 0
+where there is no data. The explorer then uses them in place of `w`,
+and every month of a selection is exactly the union of the sums. Within
+a record only ratios of the weights matter; for sea ice `sum(w * mean)`
+is itself sea ice area. A site lists the weights file in `extraFiles`
+so the Mechanics page shows it.
 
 ## Adding a record
 
