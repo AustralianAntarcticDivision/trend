@@ -42,7 +42,7 @@ window.TREND_SITE = {
     family: ["sst:oisst", "chl:occci-log10chl"],   // other records, read from their sites
     view: "tmerc",                     // default view (all views are in the menu)
     rotate: [-115, 70],                // central meridian 115E; globe centred 115E 70S
-    tmerc: { lat: -90, radius: 50 },   // cap the transverse Mercator frames
+    tmerc: { frame: "both", radius: 50 },   // south | north | both polar caps
     coast: true                        // coastline on at load
   }
 };
@@ -52,6 +52,9 @@ Views: `world` (Equal Earth, the family default), `tmerc` (transverse
 Mercator on the central meridian, as `+proj=tmerc +lon_0=...`; the polar
 default), `ortho` (globe), `longlat`, `spilhaus` (needs `sring` in the
 export), `faces` (S2 cube net). All views share the central meridian.
+The tmerc view is framed on the polar cap(s) of `tmerc.frame`: both
+poles lie on the central meridian, so one transverse Mercator holds both
+caps (`"both"`: Antarctic below, Arctic above on `lon_0=115`).
 
 A page is a thin HTML file: kit CSS, `kit/records.js`, `site.js`, the
 header placeholder `<header class="trend"></header><script
@@ -60,6 +63,15 @@ Record-specific pages (trend.sst Heatwaves, trend.ice's analysis pages)
 use the kit header and CSS and keep their own content and scripts.
 
 ## Data contract
+
+A record's site **sources** (what the explorer and status series show)
+are usually one-to-one with its **stores** (`sums/<store>/` in the
+bucket). A source may be made of several stores with disjoint cells:
+trend.ice's CDR is one bipolar source from a south and a north store,
+declared in `records.js` as `stores: { "cdr-sic": "s", "cdr-sic-north":
+"n" }` so the explorer's code reads only the stores that hold the
+selected cells. `status.json` is per store (each may carry a `label`),
+`series.json` per source, and a source lists only the regions it has.
 
 Written by each record's exporter into the site's `data/`:
 
